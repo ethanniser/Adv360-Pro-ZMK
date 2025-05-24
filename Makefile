@@ -9,7 +9,7 @@ SELINUX1 := :z
 SELINUX2 := ,z
 endif
 
-.PHONY: all left clean_firmware clean_image clean
+.PHONY: all left clean_firmware clean_image clean move
 
 all:
 	$(shell bin/get_version_local.sh clique >> /dev/null)
@@ -42,3 +42,18 @@ clean_image:
 	$(DOCKER) image rm zmk docker.io/zmkfirmware/zmk-build-arm:stable
 
 clean: clean_firmware clean_image
+
+move:
+	@if [ -d "/volumes/ADV360PRO" ]; then \
+		LATEST_LEFT=$$(ls -t firmware/*-left-clique.uf2 2>/dev/null | head -n1); \
+		if [ -n "$$LATEST_LEFT" ]; then \
+			cp "$$LATEST_LEFT" /volumes/ADV360PRO/; \
+			echo "Moved $$LATEST_LEFT to /volumes/ADV360PRO/"; \
+		else \
+			echo "No left firmware file found in firmware/ directory"; \
+			exit 1; \
+		fi; \
+	else \
+		echo "Error: /volumes/ADV360PRO directory not found"; \
+		exit 1; \
+	fi
